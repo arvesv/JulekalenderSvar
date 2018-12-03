@@ -10,24 +10,19 @@ namespace Dec_03
         private const ulong MaxJuleNumber = 4294967296;
 
 
-        private static List<ulong> memory = new List<ulong>();
+        private static readonly List<ulong> Memory = new List<ulong>();
 
         private static ulong GetPrime(int primePos)
         {
-            if (primePos >= memory.Count)
+            if (primePos >= Memory.Count)
             {
-                if (primePos == 0)
-                {
-                    memory.Add(2);
-                }
+                if (primePos == 0) Memory.Add(2);
 
-                for (var start = memory.Count; start <= primePos; start++)
-                {
-                    memory.Add(GetNextPrime(memory[memory.Count - 1]));
-                }
+                for (var start = Memory.Count; start <= primePos; start++)
+                    Memory.Add(GetNextPrime(Memory[Memory.Count - 1]));
             }
 
-            return memory[primePos];
+            return Memory[primePos];
         }
 
         private static ulong GetNextPrime(ulong p)
@@ -39,47 +34,33 @@ namespace Dec_03
 
                 var sqrt = Math.Sqrt(p);
 
-                isPrime = !memory.TakeWhile(oldprimes => oldprimes <= sqrt).Any(y => p % y == 0);
-
+                isPrime = Memory.TakeWhile(oldprimes => oldprimes <= sqrt).All(y => p % y != 0);
             } while (!isPrime);
 
             return p;
         }
 
-        private static ulong GetJuletall(int[] primes)
+        private static ulong GetJuletall(IEnumerable<int> primes)
         {
-            ulong result = 1;
-
-            foreach (var prime in primes)
-            {
-                result *= GetPrime(prime);
-            }
-
-            return result;
+            return primes.Aggregate<int, ulong>(1, (current, prime) => current * GetPrime(prime));
         }
 
         private static void Main(string[] args)
         {
-            int answer = 0;
-            int primeNo = 0;
-
-            int[] primes = new int[NoFactors];
-
+            var answer = 0;
+            var primes = new int[NoFactors];
 
             var tall = GetJuletall(primes);
 
-            bool moreRoom = true;
+            var moreRoom = true;
             do
             {
                 if (tall < MaxJuleNumber)
                 {
                     answer++;
-                    Console.Write(tall);
-                    foreach (var p in primes)
-                    {
-                        Console.Write(" {0}", p);                      
-                    }
-                    Console.WriteLine();
+/*                    Console.Write(tall);
+                    foreach (var p in primes) Console.Write(" {0}", p);
+                    Console.WriteLine();*/
                     primes[0]++;
                 }
                 else
@@ -88,35 +69,29 @@ namespace Dec_03
                 }
 
                 tall = GetJuletall(primes);
-
             } while (moreRoom);
 
-            Console.WriteLine("Hello World! {0}", answer);
+            Console.WriteLine("Answer {0}", answer);
         }
 
         private static bool IncrementFlow(int[] primes)
         {
-            int pos = 0;
+            var pos = 0;
 
             while (pos < NoFactors - 1)
             {
-
                 if (primes[pos] > primes[pos + 1])
                 {
                     primes[pos + 1]++;
-                    for (int i = 0; i <= pos; i++)
-                    {
-                        primes[i] = primes[pos + 1];
-
-                    }
+                    for (var i = 0; i <= pos; i++) primes[i] = primes[pos + 1];
 
                     return true;
                 }
-                else
-                    pos++;
-            }
 
-            return false;
+            pos++;
         }
+
+        return false;
+    }
     }
 }
